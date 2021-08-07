@@ -92,8 +92,8 @@ public class ExamCalendarServiceImpl implements ExamCalendarService {
   }
 
   @Override
-  public List<ExamCalendarInfo> getAllExamCalendarInfo() {
-    return null;
+  public List<ExamCalendarInfo> getAllExamsCalendarInfo() {
+    return calendarInfoRepository.findAll();
   }
 
   private boolean isPdf(MultipartFile file) {

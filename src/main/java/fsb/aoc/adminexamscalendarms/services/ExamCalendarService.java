@@ -23,5 +23,5 @@ public interface ExamCalendarService {
 
   ExamCalendarInfo getCalendarInfo(Long id);
 
-  List<ExamCalendarInfo> getAllExamCalendarInfo();
+  List<ExamCalendarInfo> getAllExamsCalendarInfo();
 }
