@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/** Additional information to save the ExamCalendar in the right location. */
+/** Additional information for filtering calenders */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
