@@ -11,17 +11,17 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface ExamCalendarService {
 
-  void saveCalendarFile(MultipartFile file, ExamCalendarContext details);
+  void saveCalender(MultipartFile file, ExamCalendarContext details);
 
-  Resource loadCalendarFile(Long id);
+  Resource loadCalenderFile(Long id);
 
-  Resource loadCalendarFile(String name);
+  Resource loadCalenderFile(String name);
 
-  void deleteCalendarFile(Long id);
+  void deleteCalender(Long id);
 
-  void deleteCalendarFile(String name);
+  void deleteCalender(String name);
 
   ExamCalendarInfo getCalendarInfo(Long id);
 
-  List<ExamCalendarInfo> getAllExamsCalendarInfo();
+  List<ExamCalendarInfo> getAllCalendarsInfo();
 }

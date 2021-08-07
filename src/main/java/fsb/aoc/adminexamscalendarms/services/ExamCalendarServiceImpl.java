@@ -34,7 +34,7 @@ public class ExamCalendarServiceImpl implements ExamCalendarService {
   }
 
   @Override
-  public void saveCalendarFile(MultipartFile file, ExamCalendarContext calendarContext) {
+  public void saveCalender(MultipartFile file, ExamCalendarContext calendarContext) {
     if (!isPdf(file)) {
       throw new ExamCalendarException("Exams calendar needs to be in PDF format");
     }
@@ -66,7 +66,7 @@ public class ExamCalendarServiceImpl implements ExamCalendarService {
   }
 
   @Override
-  public Resource loadCalendarFile(Long id) {
+  public Resource loadCalenderFile(Long id) {
     Optional<ExamCalendarInfo> calendarInfo = calendarInfoRepository.findById(id);
     if (calendarInfo.isPresent()) {
       ExamCalendarInfo calendarInfoData = calendarInfo.get();
@@ -76,15 +76,15 @@ public class ExamCalendarServiceImpl implements ExamCalendarService {
   }
 
   @Override
-  public Resource loadCalendarFile(String name) {
+  public Resource loadCalenderFile(String name) {
     return null;
   }
 
   @Override
-  public void deleteCalendarFile(Long id) {}
+  public void deleteCalender(Long id) {}
 
   @Override
-  public void deleteCalendarFile(String name) {}
+  public void deleteCalender(String name) {}
 
   @Override
   public ExamCalendarInfo getCalendarInfo(Long id) {
@@ -92,7 +92,7 @@ public class ExamCalendarServiceImpl implements ExamCalendarService {
   }
 
   @Override
-  public List<ExamCalendarInfo> getAllExamsCalendarInfo() {
+  public List<ExamCalendarInfo> getAllCalendarsInfo() {
     return calendarInfoRepository.findAll();
   }
 
