@@ -92,7 +92,9 @@ public class ExamCalendarServiceImpl implements ExamCalendarService {
   }
 
   @Override
-  public void deleteCalender(String name) {}
+  public void deleteCalender(String name) {
+    deleteCalender(calendarInfoRepository.findExamCalendarInfoByFileName(name).getId());
+  }
 
   @Override
   public ExamCalendarInfo getCalendarInfo(Long id) {
