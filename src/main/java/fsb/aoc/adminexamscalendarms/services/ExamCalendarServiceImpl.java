@@ -81,7 +81,15 @@ public class ExamCalendarServiceImpl implements ExamCalendarService {
   }
 
   @Override
-  public void deleteCalender(Long id) {}
+  public void deleteCalender(Long id) {
+    Resource calenderFile = loadCalenderFile(id);
+    try {
+      Files.delete(calenderFile.getFile().toPath());
+      calendarInfoRepository.deleteById(id);
+    } catch (IOException e) {
+      throw new ExamCalendarException("Could not delete file of id: " + id + " because, " + e);
+    }
+  }
 
   @Override
   public void deleteCalender(String name) {}
