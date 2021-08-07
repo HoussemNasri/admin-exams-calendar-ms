@@ -24,7 +24,12 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api")
 public class ExamCalendarController {
-  @Autowired private ExamCalendarService examCalendarService;
+  private static final String PDF_MIME_TYPE = "application/pdf";
+  private final ExamCalendarService examCalendarService;
+
+  public ExamCalendarController(ExamCalendarService examCalendarService) {
+    this.examCalendarService = examCalendarService;
+  }
 
   @PostMapping("/examens")
   public ResponseEntity<ResponseMessage> upload(@ModelAttribute UploadFileFormWrapper formWrapper) {
@@ -45,21 +50,12 @@ public class ExamCalendarController {
   public ResponseEntity<Resource> download(@PathVariable("id") Long calendarId) {
     Resource calendarFileResource = examCalendarService.loadCalendarFile(calendarId);
     if (calendarFileResource.exists()) {
-      try {
-        System.out.println("PATH: " + calendarFileResource.getFile().getAbsolutePath());
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-      String contentType = "application/pdf";
-
       return ResponseEntity.ok()
-          .contentType(MediaType.parseMediaType(contentType))
+          .contentType(MediaType.parseMediaType(PDF_MIME_TYPE))
           .header(
               HttpHeaders.CONTENT_DISPOSITION,
               "attachment; filename=\"" + calendarFileResource.getFilename() + "\"")
           .body(calendarFileResource);
-    } else {
-      System.out.println("File do not exists");
     }
     return ResponseEntity.noContent().build();
   }
