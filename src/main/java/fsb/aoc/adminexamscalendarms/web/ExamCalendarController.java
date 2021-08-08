@@ -1,5 +1,6 @@
 package fsb.aoc.adminexamscalendarms.web;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,11 +43,11 @@ public class ExamCalendarController {
           formWrapper.getFile(),
           new ExamCalendarContext(formWrapper.getSemester(), formWrapper.getSession()));
       return ResponseEntity.ok(
-          createSuccessResponse(
+          buildSuccessResponse(
               "File Uploaded Successfully: " + formWrapper.getFile().getOriginalFilename()));
     } catch (Exception e) {
       return ResponseEntity.internalServerError()
-          .body(createErrorResponse("Upload Failed : " + e.getMessage()));
+          .body(buildErrorResponse("Upload Failed : " + e.getMessage()));
     }
   }
 
@@ -62,7 +63,7 @@ public class ExamCalendarController {
           .body(calendarFileResource);
     } catch (Exception e) {
       return ResponseEntity.internalServerError()
-          .body(createErrorResponse("Download Failed: " + e.getMessage()));
+          .body(buildErrorResponse("Download Failed: " + e.getMessage()));
     }
   }
 
@@ -77,14 +78,16 @@ public class ExamCalendarController {
   }
 
   @GetMapping("/examens")
-  public ResponseEntity<Object> searchExams(
+  public ResponseEntity<Object> searchExamCalenders(
       @RequestParam(required = false) String semester,
       @RequestParam(required = false) String session) {
     try {
+      if (semester == null && session == null) {
+        return ResponseEntity.ok(examCalendarService.getAllCalendarsInfo());
+      }
       ExamCalendarInfo.Semester semesterEnum = parseSemester(semester);
       ExamCalendarInfo.ExamsSession sessionEnum = parseSession(session);
       List<ExamCalendarInfo> result;
-
       if (semesterEnum != null) {
         if (sessionEnum != null) {
           result = examCalendarService.searchForCalendarInfo(semesterEnum, sessionEnum);
@@ -95,7 +98,7 @@ public class ExamCalendarController {
         if (sessionEnum != null) {
           result = examCalendarService.searchForCalendarInfo(sessionEnum);
         } else {
-          result = examCalendarService.getAllCalendarsInfo();
+          result = Collections.emptyList();
         }
       }
 
@@ -105,14 +108,14 @@ public class ExamCalendarController {
       return ResponseEntity.ok(result);
     } catch (Exception e) {
       return ResponseEntity.internalServerError()
-          .body(createErrorResponse("Fetching Calendars Information Failed : " + e.getMessage()));
+          .body(buildErrorResponse("Fetching Calendars Information Failed : " + e));
     }
   }
 
   private @Nullable ExamCalendarInfo.ExamsSession parseSession(String session) {
     try {
       return ExamCalendarInfo.ExamsSession.valueOf(session);
-    } catch (IllegalArgumentException e) {
+    } catch (IllegalArgumentException | NullPointerException e) {
       return null;
     }
   }
@@ -120,18 +123,18 @@ public class ExamCalendarController {
   private ExamCalendarInfo.Semester parseSemester(String semester) {
     try {
       return ExamCalendarInfo.Semester.valueOf(semester);
-    } catch (IllegalArgumentException e) {
+    } catch (IllegalArgumentException | NullPointerException e) {
       return null;
     }
   }
 
-  private Map<String, String> createErrorResponse(String errorMessage) {
+  private Map<String, String> buildErrorResponse(String errorMessage) {
     Map<String, String> result = new HashMap<>();
     result.put("error", errorMessage);
     return result;
   }
 
-  private Map<String, String> createSuccessResponse(String message) {
+  private Map<String, String> buildSuccessResponse(String message) {
     Map<String, String> result = new HashMap<>();
     result.put("message", message);
     return result;
