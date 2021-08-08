@@ -1,10 +1,7 @@
 package fsb.aoc.adminexamscalendarms.services;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -13,9 +10,7 @@ import fsb.aoc.adminexamscalendarms.entities.ExamCalendarInfo;
 import fsb.aoc.adminexamscalendarms.exceptions.ExamCalendarException;
 import fsb.aoc.adminexamscalendarms.model.ExamCalendarContext;
 import fsb.aoc.adminexamscalendarms.repositories.ExamCalendarInfoRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -81,19 +76,21 @@ public class ExamCalendarServiceImpl implements ExamCalendarService {
   }
 
   @Override
-  public void deleteCalender(Long id) {
+  public ExamCalendarInfo deleteCalender(Long id) {
     Resource calenderFile = loadCalenderFile(id);
     try {
       Files.delete(calenderFile.getFile().toPath());
+      ExamCalendarInfo calendarInfo = calendarInfoRepository.getById(id);
       calendarInfoRepository.deleteById(id);
+      return calendarInfo;
     } catch (IOException e) {
       throw new ExamCalendarException("Could not delete file of id: " + id + " because, " + e);
     }
   }
 
   @Override
-  public void deleteCalender(String name) {
-    deleteCalender(calendarInfoRepository.findExamCalendarInfoByFileName(name).getId());
+  public ExamCalendarInfo deleteCalender(String name) {
+    return deleteCalender(calendarInfoRepository.findExamCalendarInfoByFileName(name).getId());
   }
 
   @Override

@@ -5,7 +5,6 @@ import java.util.Map;
 
 import fsb.aoc.adminexamscalendarms.entities.ExamCalendarInfo;
 import fsb.aoc.adminexamscalendarms.model.ExamCalendarContext;
-import fsb.aoc.adminexamscalendarms.response.ResponseMessage;
 import fsb.aoc.adminexamscalendarms.services.ExamCalendarService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -34,8 +33,7 @@ public class ExamCalendarController {
   }
 
   @PostMapping("/examens")
-  public ResponseEntity<Object> upload(
-      @ModelAttribute UploadFileFormWrapper formWrapper) {
+  public ResponseEntity<Object> upload(@ModelAttribute UploadFileFormWrapper formWrapper) {
     try {
       examCalendarService.saveCalender(
           formWrapper.getFile(),
@@ -65,6 +63,16 @@ public class ExamCalendarController {
     }
   }
 
+  @DeleteMapping("/examens/{id}")
+  public ResponseEntity<Object> delete(@PathVariable("id") Long calendarId) {
+    try {
+      ExamCalendarInfo deletedCalendarInfo = examCalendarService.deleteCalender(calendarId);
+      return ResponseEntity.ok(deletedCalendarInfo);
+    } catch (Exception e) {
+      return ResponseEntity.notFound().build();
+    }
+  }
+
   private Map<String, String> createErrorResponse(String errorMessage) {
     Map<String, String> result = new HashMap<>();
     result.put("error", errorMessage);
@@ -75,11 +83,6 @@ public class ExamCalendarController {
     Map<String, String> result = new HashMap<>();
     result.put("message", message);
     return result;
-  }
-
-  @DeleteMapping("/examens/{id}")
-  public ResponseEntity<ExamCalendarInfo> delete(@PathVariable("id") Long calendarId) {
-    return null;
   }
 
   @Data
