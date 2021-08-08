@@ -20,14 +20,16 @@ public interface ExamCalendarService {
 
   ExamCalendarInfo deleteCalender(String name);
 
+  ExamCalendarInfo renameCalender(Long calendarId, String name);
+
   ExamCalendarInfo getCalendarInfo(Long id);
 
   List<ExamCalendarInfo> getAllCalendarsInfo();
 
-  List<ExamCalendarInfo> searchForCalendarInfo(
+  List<ExamCalendarInfo> findCalenderBy(
       ExamCalendarInfo.Semester semester, ExamCalendarInfo.ExamsSession session);
 
-  List<ExamCalendarInfo> searchForCalendarInfo(ExamCalendarInfo.Semester semester);
+  List<ExamCalendarInfo> findCalenderBy(ExamCalendarInfo.Semester semester);
 
-  List<ExamCalendarInfo> searchForCalendarInfo(ExamCalendarInfo.ExamsSession session);
+  List<ExamCalendarInfo> findCalenderBy(ExamCalendarInfo.ExamsSession session);
 }

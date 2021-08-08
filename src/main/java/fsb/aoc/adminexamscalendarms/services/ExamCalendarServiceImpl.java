@@ -2,6 +2,8 @@ package fsb.aoc.adminexamscalendarms.services;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -46,7 +48,10 @@ public class ExamCalendarServiceImpl implements ExamCalendarService {
     }
 
     ExamCalendarInfo calendarInfo = new ExamCalendarInfo();
-    calendarInfo.setFileName(file.getOriginalFilename());
+    String originalFilename = file.getOriginalFilename();
+    String pureFileName =
+        originalFilename.endsWith(".pdf") ? originalFilename.substring(0, originalFilename.length() - 4) : originalFilename;
+    calendarInfo.setFileName(pureFileName);
     calendarInfo.setFileSize(file.getSize());
     calendarInfo.setYear(LocalDateTime.now().getYear());
     calendarInfo.setFilePath(
@@ -96,6 +101,29 @@ public class ExamCalendarServiceImpl implements ExamCalendarService {
   }
 
   @Override
+  public ExamCalendarInfo renameCalender(Long calendarId, String name) {
+    Optional<ExamCalendarInfo> calendarInfo = calendarInfoRepository.findById(calendarId);
+    if (calendarInfo.isPresent()) {
+      ExamCalendarInfo calendarData = calendarInfo.get();
+      Path oldFilePath = Paths.get(calendarData.getFilePath());
+      if (Files.exists(oldFilePath)) {
+        if (name != null && !name.trim().isEmpty()) {
+          name = name.endsWith(".pdf") ? name.substring(0, name.length() - 4) : name;
+          calendarData.setFileName(name);
+          calendarData.setFilePath(oldFilePath.getParent().resolve(name.concat(".pdf")).toString());
+          Path newFilePath = Paths.get(calendarData.getFilePath());
+          try {
+            Files.move(oldFilePath, newFilePath);
+            return calendarInfoRepository.save(calendarData);
+          } catch (IOException ignored) {
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  @Override
   public ExamCalendarInfo getCalendarInfo(Long id) {
     return calendarInfoRepository.getById(id);
   }
@@ -106,18 +134,18 @@ public class ExamCalendarServiceImpl implements ExamCalendarService {
   }
 
   @Override
-  public List<ExamCalendarInfo> searchForCalendarInfo(
+  public List<ExamCalendarInfo> findCalenderBy(
       ExamCalendarInfo.Semester semester, ExamCalendarInfo.ExamsSession session) {
     return calendarInfoRepository.findExamCalendarInfoBySemesterAndSession(semester, session);
   }
 
   @Override
-  public List<ExamCalendarInfo> searchForCalendarInfo(ExamCalendarInfo.Semester semester) {
+  public List<ExamCalendarInfo> findCalenderBy(ExamCalendarInfo.Semester semester) {
     return calendarInfoRepository.findExamCalendarInfoBySemester(semester);
   }
 
   @Override
-  public List<ExamCalendarInfo> searchForCalendarInfo(ExamCalendarInfo.ExamsSession session) {
+  public List<ExamCalendarInfo> findCalenderBy(ExamCalendarInfo.ExamsSession session) {
     return calendarInfoRepository.findExamCalendarInfoBySession(session);
   }
 

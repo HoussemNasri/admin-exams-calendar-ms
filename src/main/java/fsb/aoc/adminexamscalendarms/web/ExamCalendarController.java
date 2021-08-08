@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -78,7 +80,7 @@ public class ExamCalendarController {
   }
 
   @GetMapping("/examens")
-  public ResponseEntity<Object> searchExamCalenders(
+  public ResponseEntity<Object> search(
       @RequestParam(required = false) String semester,
       @RequestParam(required = false) String session) {
     try {
@@ -90,13 +92,13 @@ public class ExamCalendarController {
       List<ExamCalendarInfo> result;
       if (semesterEnum != null) {
         if (sessionEnum != null) {
-          result = examCalendarService.searchForCalendarInfo(semesterEnum, sessionEnum);
+          result = examCalendarService.findCalenderBy(semesterEnum, sessionEnum);
         } else {
-          result = examCalendarService.searchForCalendarInfo(semesterEnum);
+          result = examCalendarService.findCalenderBy(semesterEnum);
         }
       } else {
         if (sessionEnum != null) {
-          result = examCalendarService.searchForCalendarInfo(sessionEnum);
+          result = examCalendarService.findCalenderBy(sessionEnum);
         } else {
           result = Collections.emptyList();
         }
@@ -111,6 +113,25 @@ public class ExamCalendarController {
           .body(buildErrorResponse("Fetching Calendars Information Failed : " + e));
     }
   }
+
+  @PutMapping("/examens/{id}")
+  public ResponseEntity<Object> rename(
+      @PathVariable("id") Long toUpdateCalendarId, @RequestParam("name") String newName) {
+    try {
+      return ResponseEntity.ok(examCalendarService.renameCalender(toUpdateCalendarId, newName));
+    } catch (Exception e) {
+      return ResponseEntity.internalServerError()
+          .body(
+              buildErrorResponse(
+                  "Cannot rename calendar of id: " + toUpdateCalendarId + " to name: " + newName));
+    }
+  }
+
+  /*@PutMapping("/examens/{id}")
+  public ResponseEntity<Object> updatedCalenderFile(
+      @PathVariable("id") Long toUpdateCalendarId, MultipartFile newCalendarFile) {
+    return null;
+  }*/
 
   private @Nullable ExamCalendarInfo.ExamsSession parseSession(String session) {
     try {
@@ -147,5 +168,10 @@ public class ExamCalendarController {
     private MultipartFile file;
     private String semester;
     private String session;
+  }
+
+  private static class UpdateFileFormWrapper {
+    private Long toUpdateCalendarId;
+    private MultipartFile file;
   }
 }
