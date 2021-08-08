@@ -1,18 +1,20 @@
 package fsb.aoc.adminexamscalendarms.web;
 
-import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
+import fsb.aoc.adminexamscalendarms.entities.ExamCalendarInfo;
 import fsb.aoc.adminexamscalendarms.model.ExamCalendarContext;
 import fsb.aoc.adminexamscalendarms.response.ResponseMessage;
 import fsb.aoc.adminexamscalendarms.services.ExamCalendarService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,32 +34,52 @@ public class ExamCalendarController {
   }
 
   @PostMapping("/examens")
-  public ResponseEntity<ResponseMessage> upload(@ModelAttribute UploadFileFormWrapper formWrapper) {
+  public ResponseEntity<Object> upload(
+      @ModelAttribute UploadFileFormWrapper formWrapper) {
     try {
-      examCalendarService.saveCalendarFile(
+      examCalendarService.saveCalender(
           formWrapper.getFile(),
           new ExamCalendarContext(formWrapper.getSemester(), formWrapper.getSession()));
       return ResponseEntity.ok(
-          ResponseMessage.success(
+          createSuccessResponse(
               "File Uploaded Successfully: " + formWrapper.getFile().getOriginalFilename()));
     } catch (Exception e) {
       return ResponseEntity.internalServerError()
-          .body(ResponseMessage.failed("Upload Failed : " + e.getMessage()));
+          .body(createErrorResponse("Upload Failed : " + e.getMessage()));
     }
   }
 
   @GetMapping("/examens/{id}")
-  public ResponseEntity<Resource> download(@PathVariable("id") Long calendarId) {
-    Resource calendarFileResource = examCalendarService.loadCalendarFile(calendarId);
-    if (calendarFileResource.exists()) {
+  public ResponseEntity<Object> download(@PathVariable("id") Long calendarId) {
+    try {
+      Resource calendarFileResource = examCalendarService.loadCalenderFile(calendarId);
       return ResponseEntity.ok()
           .contentType(MediaType.parseMediaType(PDF_MIME_TYPE))
           .header(
               HttpHeaders.CONTENT_DISPOSITION,
               "attachment; filename=\"" + calendarFileResource.getFilename() + "\"")
           .body(calendarFileResource);
+    } catch (Exception e) {
+      return ResponseEntity.internalServerError()
+          .body(createErrorResponse("Download Failed: " + e.getMessage()));
     }
-    return ResponseEntity.noContent().build();
+  }
+
+  private Map<String, String> createErrorResponse(String errorMessage) {
+    Map<String, String> result = new HashMap<>();
+    result.put("error", errorMessage);
+    return result;
+  }
+
+  private Map<String, String> createSuccessResponse(String message) {
+    Map<String, String> result = new HashMap<>();
+    result.put("message", message);
+    return result;
+  }
+
+  @DeleteMapping("/examens/{id}")
+  public ResponseEntity<ExamCalendarInfo> delete(@PathVariable("id") Long calendarId) {
+    return null;
   }
 
   @Data
