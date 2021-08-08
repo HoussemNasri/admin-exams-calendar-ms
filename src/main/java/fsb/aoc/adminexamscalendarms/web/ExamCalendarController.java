@@ -1,6 +1,7 @@
 package fsb.aoc.adminexamscalendarms.web;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import fsb.aoc.adminexamscalendarms.entities.ExamCalendarInfo;
@@ -13,12 +14,14 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -70,6 +73,55 @@ public class ExamCalendarController {
       return ResponseEntity.ok(deletedCalendarInfo);
     } catch (Exception e) {
       return ResponseEntity.notFound().build();
+    }
+  }
+
+  @GetMapping("/examens")
+  public ResponseEntity<Object> searchExams(
+      @RequestParam(required = false) String semester,
+      @RequestParam(required = false) String session) {
+    try {
+      ExamCalendarInfo.Semester semesterEnum = parseSemester(semester);
+      ExamCalendarInfo.ExamsSession sessionEnum = parseSession(session);
+      List<ExamCalendarInfo> result;
+
+      if (semesterEnum != null) {
+        if (sessionEnum != null) {
+          result = examCalendarService.searchForCalendarInfo(semesterEnum, sessionEnum);
+        } else {
+          result = examCalendarService.searchForCalendarInfo(semesterEnum);
+        }
+      } else {
+        if (sessionEnum != null) {
+          result = examCalendarService.searchForCalendarInfo(sessionEnum);
+        } else {
+          result = examCalendarService.getAllCalendarsInfo();
+        }
+      }
+
+      if (result == null || result.isEmpty()) {
+        return ResponseEntity.noContent().build();
+      }
+      return ResponseEntity.ok(result);
+    } catch (Exception e) {
+      return ResponseEntity.internalServerError()
+          .body(createErrorResponse("Fetching Calendars Information Failed : " + e.getMessage()));
+    }
+  }
+
+  private @Nullable ExamCalendarInfo.ExamsSession parseSession(String session) {
+    try {
+      return ExamCalendarInfo.ExamsSession.valueOf(session);
+    } catch (IllegalArgumentException e) {
+      return null;
+    }
+  }
+
+  private ExamCalendarInfo.Semester parseSemester(String semester) {
+    try {
+      return ExamCalendarInfo.Semester.valueOf(semester);
+    } catch (IllegalArgumentException e) {
+      return null;
     }
   }
 

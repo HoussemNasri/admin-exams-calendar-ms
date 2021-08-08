@@ -5,8 +5,8 @@ import java.util.List;
 import fsb.aoc.adminexamscalendarms.entities.ExamCalendarInfo;
 import fsb.aoc.adminexamscalendarms.model.ExamCalendarContext;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.web.multipart.MultipartFile;
-
 
 public interface ExamCalendarService {
 
@@ -23,4 +23,11 @@ public interface ExamCalendarService {
   ExamCalendarInfo getCalendarInfo(Long id);
 
   List<ExamCalendarInfo> getAllCalendarsInfo();
+
+  List<ExamCalendarInfo> searchForCalendarInfo(
+      ExamCalendarInfo.Semester semester, ExamCalendarInfo.ExamsSession session);
+
+  List<ExamCalendarInfo> searchForCalendarInfo(ExamCalendarInfo.Semester semester);
+
+  List<ExamCalendarInfo> searchForCalendarInfo(ExamCalendarInfo.ExamsSession session);
 }

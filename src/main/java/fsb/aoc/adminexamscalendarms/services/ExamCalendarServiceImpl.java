@@ -3,6 +3,7 @@ package fsb.aoc.adminexamscalendarms.services;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,6 +12,7 @@ import fsb.aoc.adminexamscalendarms.exceptions.ExamCalendarException;
 import fsb.aoc.adminexamscalendarms.model.ExamCalendarContext;
 import fsb.aoc.adminexamscalendarms.repositories.ExamCalendarInfoRepository;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -80,7 +82,7 @@ public class ExamCalendarServiceImpl implements ExamCalendarService {
     Resource calenderFile = loadCalenderFile(id);
     try {
       Files.delete(calenderFile.getFile().toPath());
-      ExamCalendarInfo calendarInfo = calendarInfoRepository.getById(id);
+      ExamCalendarInfo calendarInfo = getCalendarInfo(id);
       calendarInfoRepository.deleteById(id);
       return calendarInfo;
     } catch (IOException e) {
@@ -95,12 +97,28 @@ public class ExamCalendarServiceImpl implements ExamCalendarService {
 
   @Override
   public ExamCalendarInfo getCalendarInfo(Long id) {
-    return null;
+    return calendarInfoRepository.getById(id);
   }
 
   @Override
   public List<ExamCalendarInfo> getAllCalendarsInfo() {
     return calendarInfoRepository.findAll();
+  }
+
+  @Override
+  public List<ExamCalendarInfo> searchForCalendarInfo(
+      ExamCalendarInfo.Semester semester, ExamCalendarInfo.ExamsSession session) {
+    return calendarInfoRepository.findExamCalendarInfoBySemesterAndSession(semester, session);
+  }
+
+  @Override
+  public List<ExamCalendarInfo> searchForCalendarInfo(ExamCalendarInfo.Semester semester) {
+    return calendarInfoRepository.findExamCalendarInfoBySemester(semester);
+  }
+
+  @Override
+  public List<ExamCalendarInfo> searchForCalendarInfo(ExamCalendarInfo.ExamsSession session) {
+    return calendarInfoRepository.findExamCalendarInfoBySession(session);
   }
 
   private boolean isPdf(MultipartFile file) {
