@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,12 +47,11 @@ public class ExamCalendarController {
           buildSuccessResponse(
               "File Uploaded Successfully: " + formWrapper.getFile().getOriginalFilename()));
     } catch (Exception e) {
-      return ResponseEntity.internalServerError()
-          .body(buildErrorResponse("Upload Failed : " + e.getMessage()));
+      return ResponseEntity.internalServerError().body(buildErrorResponse("Upload Failed : " + e));
     }
   }
 
-  @GetMapping("/examens/{id}")
+  @GetMapping("/examens/uploads/{id}")
   public ResponseEntity<Object> download(@PathVariable("id") Long calendarId) {
     try {
       Resource calendarFileResource = examCalendarService.loadCalenderFile(calendarId);
@@ -66,6 +64,23 @@ public class ExamCalendarController {
     } catch (Exception e) {
       return ResponseEntity.internalServerError()
           .body(buildErrorResponse("Download Failed: " + e.getMessage()));
+    }
+  }
+
+  @GetMapping("/examens/{id}")
+  public ResponseEntity<ExamCalendarInfo> getCalendarInfo(@PathVariable("id") Long calendarId) {
+    try {
+      ExamCalendarInfo calendarInfo = examCalendarService.getCalendarInfo(calendarId);
+      System.out.println("Hello");
+      if (calendarInfo != null) {
+        System.out.println(calendarInfo.getFilePath());
+        return ResponseEntity.ok(calendarInfo);
+      } else {
+        System.out.println("Not FUck");
+        return ResponseEntity.notFound().build();
+      }
+    } catch (Exception e) {
+      return ResponseEntity.internalServerError().build();
     }
   }
 
@@ -127,11 +142,30 @@ public class ExamCalendarController {
     }
   }
 
-  /*@PutMapping("/examens/{id}")
+  @PutMapping("/examens/uploads/{id}")
   public ResponseEntity<Object> updatedCalenderFile(
-      @PathVariable("id") Long toUpdateCalendarId, MultipartFile newCalendarFile) {
-    return null;
-  }*/
+      @PathVariable("id") Long toUpdateCalendarId,
+      @RequestParam("file") MultipartFile newCalendarFile) {
+    try {
+      System.out.println(newCalendarFile.getOriginalFilename());
+      ExamCalendarInfo calendarInfo =
+          examCalendarService.updateCalenderFile(toUpdateCalendarId, newCalendarFile);
+      if (calendarInfo != null) {
+        return ResponseEntity.ok(calendarInfo);
+      } else {
+        return ResponseEntity.notFound().build();
+      }
+
+    } catch (Exception e) {
+      return ResponseEntity.internalServerError()
+          .body(
+              buildErrorResponse(
+                  "Cannot update calendar document of id: "
+                      + toUpdateCalendarId
+                      + " because "
+                      + e));
+    }
+  }
 
   private @Nullable ExamCalendarInfo.ExamsSession parseSession(String session) {
     try {

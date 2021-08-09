@@ -34,23 +34,13 @@ public class ExamCalendarServiceImpl implements ExamCalendarService {
 
   @Override
   public void saveCalender(MultipartFile file, ExamCalendarContext calendarContext) {
-    if (!isPdf(file)) {
-      throw new ExamCalendarException("Exams calendar needs to be in PDF format");
-    }
-    try {
-      if (isCalendarFileExists(file)) {
-        // TODO('Fix it')
-        throw new ExamCalendarException("File already exists");
-      }
-      fileStorageService.saveFile(file);
-    } catch (IOException e) {
-      throw new ExamCalendarException("Calendar couldn't be copied to the upload folder, " + e);
-    }
-
+    saveCalendarFile(file);
     ExamCalendarInfo calendarInfo = new ExamCalendarInfo();
     String originalFilename = file.getOriginalFilename();
     String pureFileName =
-        originalFilename.endsWith(".pdf") ? originalFilename.substring(0, originalFilename.length() - 4) : originalFilename;
+        originalFilename.endsWith(".pdf")
+            ? originalFilename.substring(0, originalFilename.length() - 4)
+            : originalFilename;
     calendarInfo.setFileName(pureFileName);
     calendarInfo.setFileSize(file.getSize());
     calendarInfo.setYear(LocalDateTime.now().getYear());
@@ -72,7 +62,7 @@ public class ExamCalendarServiceImpl implements ExamCalendarService {
     Optional<ExamCalendarInfo> calendarInfo = calendarInfoRepository.findById(id);
     if (calendarInfo.isPresent()) {
       ExamCalendarInfo calendarInfoData = calendarInfo.get();
-      return fileStorageService.loadFileAsResource(calendarInfoData.getFileName());
+      return fileStorageService.loadFileAsResource(Paths.get(calendarInfoData.getFilePath()));
     }
     throw new ExamCalendarException("File Not Found, id: " + id);
   }
@@ -124,8 +114,48 @@ public class ExamCalendarServiceImpl implements ExamCalendarService {
   }
 
   @Override
+  public ExamCalendarInfo updateCalenderFile(Long calendarId, MultipartFile file) {
+    Optional<ExamCalendarInfo> calendarInfo = calendarInfoRepository.findById(calendarId);
+    if (calendarInfo.isPresent()) {
+      saveCalendarFile(file);
+      ExamCalendarInfo calendarInfoData = calendarInfo.get();
+      String originalFilename = file.getOriginalFilename();
+      String pureFileName =
+          originalFilename.endsWith(".pdf")
+              ? originalFilename.substring(0, originalFilename.length() - 4)
+              : originalFilename;
+      calendarInfoData.setFileName(pureFileName);
+      calendarInfoData.setFileSize(file.getSize());
+      calendarInfoData.setFilePath(
+          CALENDAR_UPLOADS_FOLDER.resolve(file.getOriginalFilename()).toString());
+      return calendarInfoRepository.save(calendarInfoData);
+    }
+    return null;
+  }
+
+  private void saveCalendarFile(MultipartFile file) {
+    if (!isPdf(file)) {
+      throw new ExamCalendarException("Exams calendar needs to be in PDF format");
+    }
+    try {
+      if (isCalendarFileExists(file)) {
+        // TODO('Fix it')
+        throw new ExamCalendarException("File already exists");
+      }
+      fileStorageService.saveFile(file);
+    } catch (IOException e) {
+      throw new ExamCalendarException("Calendar couldn't be copied to the upload folder, " + e);
+    }
+  }
+
+  @Override
   public ExamCalendarInfo getCalendarInfo(Long id) {
-    return calendarInfoRepository.getById(id);
+    try {
+      Optional<ExamCalendarInfo> calendarInfo = calendarInfoRepository.findById(id);
+      return calendarInfo.orElse(null);
+    } catch (Exception e) {
+      return null;
+    }
   }
 
   @Override

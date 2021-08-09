@@ -26,12 +26,17 @@ public class FileStorageServiceImpl implements FileStorageService {
   }
 
   @Override
-  public Resource loadFileAsResource(String filename) {
+  public Resource loadFileAsResource(Path path) {
     try {
-      return new UrlResource(CALENDAR_UPLOADS_FOLDER.resolve(filename).toUri());
+      return new UrlResource(path.toUri());
     } catch (MalformedURLException e) {
-      throw new FileStorageException("Error while loading " + filename + ", " + e);
+      throw new FileStorageException("Error while loading " + path.getFileName() + ", " + e);
     }
+  }
+
+  @Override
+  public Resource loadFileAsResource(String filename) {
+    return loadFileAsResource(CALENDAR_UPLOADS_FOLDER.resolve(filename));
   }
 
   @Override

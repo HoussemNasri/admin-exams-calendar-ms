@@ -22,6 +22,8 @@ public interface ExamCalendarService {
 
   ExamCalendarInfo renameCalender(Long calendarId, String name);
 
+  ExamCalendarInfo updateCalenderFile(Long id, MultipartFile file);
+
   ExamCalendarInfo getCalendarInfo(Long id);
 
   List<ExamCalendarInfo> getAllCalendarsInfo();
