@@ -119,6 +119,12 @@ public class ExamCalendarServiceImpl implements ExamCalendarService {
     if (calendarInfo.isPresent()) {
       saveCalendarFile(file);
       ExamCalendarInfo calendarInfoData = calendarInfo.get();
+      // Deleting old document
+      try {
+        Files.delete(Paths.get(calendarInfoData.getFilePath()));
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
       String originalFilename = file.getOriginalFilename();
       String pureFileName =
           originalFilename.endsWith(".pdf")

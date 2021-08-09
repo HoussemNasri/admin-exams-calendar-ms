@@ -71,12 +71,9 @@ public class ExamCalendarController {
   public ResponseEntity<ExamCalendarInfo> getCalendarInfo(@PathVariable("id") Long calendarId) {
     try {
       ExamCalendarInfo calendarInfo = examCalendarService.getCalendarInfo(calendarId);
-      System.out.println("Hello");
       if (calendarInfo != null) {
-        System.out.println(calendarInfo.getFilePath());
         return ResponseEntity.ok(calendarInfo);
       } else {
-        System.out.println("Not FUck");
         return ResponseEntity.notFound().build();
       }
     } catch (Exception e) {
@@ -147,7 +144,6 @@ public class ExamCalendarController {
       @PathVariable("id") Long toUpdateCalendarId,
       @RequestParam("file") MultipartFile newCalendarFile) {
     try {
-      System.out.println(newCalendarFile.getOriginalFilename());
       ExamCalendarInfo calendarInfo =
           examCalendarService.updateCalenderFile(toUpdateCalendarId, newCalendarFile);
       if (calendarInfo != null) {
