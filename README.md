@@ -1,5 +1,5 @@
-# admin-exams-calendar-ms
-# API
+# Exam Calender Rest API
+## API
 **GET** `/api/examens`
 
 > Fetch all calenders information in JSON format.
