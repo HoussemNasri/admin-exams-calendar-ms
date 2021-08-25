@@ -1,4 +1,4 @@
-# Exam Calender Rest API
+# Exam Calendar Rest API
 ## API
 **GET** `/api/examens`
 
